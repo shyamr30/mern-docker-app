@@ -1,0 +1,55 @@
+/node_modules
+/.env
+
+
+#version: '3'
+
+services:
+  frontend:
+    # Path of frontend Docker file
+    build: ./trainee_frontend  # Build the Docker image from the specified directory
+    container_name: react-ui-test # Set the container name
+    restart: always # Set the container to always restart
+    ports:      
+      - "5001:3000" # Map the container port(3000) to the host port(5000)
+    stdin_open: true # Open stdin user-terminal intercation
+    tty: true # Allocate a pseudo-tty
+    depends_on:
+      - backend  # Depend on the backend service
+    networks:
+      - mern-network # Attach the container to the specified network
+
+  backend:
+  # Path of Backend Docker file 
+  # first it's create image and then node-api-test container
+    build: ./trainee_backend # Build the Docker image from the specified directory
+    container_name: node-api-test # Set the container name
+    restart: always
+    ports: 
+      - "5000:5000" # Map the container port to the host port
+    env_file:
+      - ./trainee_backend/.env
+    depends_on:
+      - database
+    networks:
+      - mern-network
+
+  database:
+    image: mongo # Use the official MongoDB image
+    container_name: mongo-db-test
+    restart: always 
+    ports:
+      - "27017:27017"  # Map the container port to the host port
+    networks:
+      - mern-network
+    volumes:
+      - /home/shyam/mongodb-database-backup:/data/db # Mount a volume to persist data
+
+networks:
+  mern-network:
+    driver: bridge
+
+#  build:
+#       context: ./trainee_frontend
+#       dockerfile: Dockerfile
+#       image: your-image-name-here # <-- Add this line
